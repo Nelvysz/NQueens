@@ -40,7 +40,7 @@ class Main {
           }
         }
 
-        board.setQ(row, col);
+        board.CheckBoard(row,col);
         board.printBoard();
       } else if (placeQ == 'n') {
         board.printBoard();
@@ -97,20 +97,51 @@ class Board {
     }
   }
 
-  public void CheckBoard(int row, int col) {
-    // System.out.println("Hello world");
+  public boolean CheckBoard(int r, int c) {
+    int i = 0;
+    boolean canPlace = true;
+    //row check row
+    for(i = 0;i<size;i++) { 
+      if(board[r-1][i] == 'Q') canPlace = false;
+    }
+    //col update
+    for(i = 0;i<size;i++){
+      if(board[i][c-1] == 'Q') canPlace = false;
+    }
+    //left diagonal update
+    int ld_row = r-2, ld_col = c-2; // upper update
+    while(ld_row >= 0 && ld_col >= 0){
+      if(board[ld_row][ld_col] == 'Q') canPlace = false;
+      ld_row--; ld_col--;
+    }
+    ld_row = r; ld_col = c; // lower update
+    while(ld_row < size && ld_col < size){
+      if(board[ld_row][ld_col] == 'Q') canPlace = false;
+      ld_row++; ld_col++;
+    }
+
+    //right diaginal update
+    int rd_row = r, rd_col = c-2; //lower update
+    while(rd_row<size && rd_col>=0){
+      if(board[rd_row][rd_col] == 'Q') canPlace = false;
+      rd_row++; rd_col--;
+    }
+    rd_row = r-2; rd_col=c;
+    while(rd_row>=0 && rd_col<size){
+      if(board[rd_row][rd_col] == 'Q') canPlace = false;
+      rd_row--; rd_col++;
+    }
+
+    if(canPlace) return true;
+    else return false;
   }
 
   public void setQ(int r, int c) {
-    board[r - 1][c - 1] = 'Q';
+    board[r][c] = 'Q';
   }
-}
 
-class Board2{
-  private Node
-}
+  public void setC(int r,int c){
+    board[r ][c] = 'C';
+  }
 
-class Node {
-  private char Q = "=";
-  private boolean Viable = True;
 }
