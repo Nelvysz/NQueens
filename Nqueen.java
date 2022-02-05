@@ -1,6 +1,7 @@
 import java.util.*;
 
-class Main {
+class Nqueen {
+  private static final int startRow = 0;
   public static void main(String[] args) {
     Scanner input = new Scanner(System.in);
     int N = 0, row = 0, col = 0;
@@ -14,12 +15,11 @@ class Main {
       }
     }
 
-    Board board = new Board(N);
-    board.printBoard();
     while (true) {
       System.out.println("Place first queen manually (y for yes) ?");
       placeQ = input.next().charAt(0);
       Character.toLowerCase(placeQ);
+      Board board = new Board(N);
       if (placeQ == 'y') {
         while (row <= 0 || row > N) {
           try {
@@ -39,10 +39,11 @@ class Main {
             continue;
           }
         }
-
-        board.CheckBoard(row,col);
-        board.printBoard();
+        board.setQ(row-1, col-1);
+        if (board.CheckBoard(0) == 0) System.out.println(" no solution");
+        else board.printBoard();
       } else if (placeQ == 'n') {
+        board.CheckBoard(row);
         board.printBoard();
       } else {
         continue;
@@ -62,86 +63,91 @@ class Main {
 }
 
 class Board {
-  private char board[][];
-  private int size;
-
-  public Board(int s) {
-    board = new char[s][s];
-    size = s;
-
-    for (int i = 0; i < s; i++) {
-      for (int j = 0; j < s; j++) {
-        board[i][j] = '=';
-      }
-    }
-  }
-
-  public void printBoard() {
-    for (int i = 0; i <= size; i++) {
-
-      for (int j = 0; j < size; j++) {
-        if (i == 0) {
-          if (j == 0) {
-            System.out.print(" ");
-          }
-          System.out.printf(" %d", j + 1);
-        } else {
-          if (j == 0) {
-            System.out.printf("%d", i);
-          }
-          System.out.printf(" %c", board[i - 1][j]);
+    private char board[][];
+    private int size;
+  
+    public Board(int s) {
+      board = new char[s][s];
+      size = s;
+  
+      for (int i = 0; i < s; i++) {
+        for (int j = 0; j < s; j++) {
+          board[i][j] = '=';
         }
       }
-
-      System.out.println();
+    }
+  
+    public void printBoard() {
+      for (int i = 0; i <= size; i++) {
+  
+        for (int j = 0; j < size; j++) {
+          if (i == 0) {
+            if (j == 0) {
+              System.out.print(" ");
+            }
+            System.out.printf(" %d", j + 1);
+          } else {
+            if (j == 0) {
+              System.out.printf("%d", i);
+            }
+            System.out.printf(" %c", board[i - 1][j]);
+          }
+        }
+  
+        System.out.println();
+      }
+    }
+  
+    private boolean foundQ(int r,int c){
+      //check row
+      int i = 0;
+      for(i = 0;i<size;i++) {  if(board[r][i] == 'Q') return true; } //check row
+      for(i = 0;i<size;i++) {  if(board[i][c] == 'Q') return true; } //check col
+      for(int ld_row = r-1,ld_col = c-1; ld_row>=0 && ld_col>=0;ld_row--,ld_col--) { //check upper left diagonal
+        if(board[ld_row][ld_col] == 'Q') return true; }
+      for(int ld_row = r+1,ld_col = c+1; ld_row<size && ld_col<size;ld_row++,ld_col++) { //check lower left diagonal
+        if(board[ld_row][ld_col] == 'Q') return true; }
+      for(int rd_row = r+1,rd_col = c-1;rd_row<size && rd_col>=0;rd_row++,rd_col--)  { //check lower right diagonal
+        if(board[rd_row][rd_col] == 'Q') return true; }
+      for(int rd_row = r-1,rd_col = c+1; rd_row>=0 && rd_col<size;rd_row--, rd_col++){ //check upper right diagonal
+        if(board[rd_row][rd_col] == 'Q') return true; }
+  
+      return false;
+    }
+  
+    public int CheckBoard(int row) {
+      if(row >=size) return 1;
+      for(int col =0;col<size;col++){ //check each col
+          if(!foundQ(row, col)){
+            this.setQ(row, col);
+            if(row >=size) return 1;
+            
+            if(CheckBoard(row+1) == 1) return 1;
+          }
+          else if( board[row][col] == 'Q') {if(CheckBoard(row+1) == 1) return 1; else return 0;}
+          if(col == size-1) break;
+          this.renoveQ(row, col);
+      }
+      return 0;
+    }
+  
+    public void setQ(int r, int c) {
+      board[r][c] = 'Q';
+    }
+  
+    public void renoveQ(int r,int c){
+      board[r][c] = '=';
+    }
+    public ArrayDeque<Integer> getQArray(){
+      ArrayDeque<Integer> QA = new ArrayDeque<>();
+      for(int i= 0;i<size;i++){
+        for(int j = 0;j<size;j++){
+          if(board[i][j] == 'Q') {
+            QA.addLast(j);
+            break;
+          }
+        }
+      }
+      return QA;
     }
   }
-
-  public boolean CheckBoard(int r, int c) {
-    int i = 0;
-    boolean canPlace = true;
-    //row check row
-    for(i = 0;i<size;i++) { 
-      if(board[r-1][i] == 'Q') canPlace = false;
-    }
-    //col update
-    for(i = 0;i<size;i++){
-      if(board[i][c-1] == 'Q') canPlace = false;
-    }
-    //left diagonal update
-    int ld_row = r-2, ld_col = c-2; // upper update
-    while(ld_row >= 0 && ld_col >= 0){
-      if(board[ld_row][ld_col] == 'Q') canPlace = false;
-      ld_row--; ld_col--;
-    }
-    ld_row = r; ld_col = c; // lower update
-    while(ld_row < size && ld_col < size){
-      if(board[ld_row][ld_col] == 'Q') canPlace = false;
-      ld_row++; ld_col++;
-    }
-
-    //right diaginal update
-    int rd_row = r, rd_col = c-2; //lower update
-    while(rd_row<size && rd_col>=0){
-      if(board[rd_row][rd_col] == 'Q') canPlace = false;
-      rd_row++; rd_col--;
-    }
-    rd_row = r-2; rd_col=c;
-    while(rd_row>=0 && rd_col<size){
-      if(board[rd_row][rd_col] == 'Q') canPlace = false;
-      rd_row--; rd_col++;
-    }
-
-    if(canPlace) return true;
-    else return false;
-  }
-
-  public void setQ(int r, int c) {
-    board[r][c] = 'Q';
-  }
-
-  public void setC(int r,int c){
-    board[r ][c] = 'C';
-  }
-
-}
